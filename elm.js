@@ -8102,6 +8102,11 @@ var _elm_lang$html$Html_Events$Options = F2(
 		return {stopPropagation: a, preventDefault: b};
 	});
 
+var _user$project$WordCounter$styles = _elm_lang$core$Array$fromList(
+	_elm_lang$core$Native_List.fromArray(
+		['dark', 'light', 'blue']));
+var _user$project$WordCounter$nStyles = _elm_lang$core$Array$length(_user$project$WordCounter$styles);
+var _user$project$WordCounter$defaultStyle = 'dark';
 var _user$project$WordCounter$formatCount = function (count) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -8131,39 +8136,96 @@ var _user$project$WordCounter$formatTime = function (seconds) {
 		minutesString,
 		A2(_elm_lang$core$Basics_ops['++'], ':', secondsString));
 };
+var _user$project$WordCounter$formatStyleIndex = function (i) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		'Style ',
+		A2(
+			_elm_lang$core$Basics_ops['++'],
+			_elm_lang$core$Basics$toString(i + 1),
+			A2(
+				_elm_lang$core$Basics_ops['++'],
+				' (of ',
+				A2(
+					_elm_lang$core$Basics_ops['++'],
+					_elm_lang$core$Basics$toString(_user$project$WordCounter$nStyles),
+					')'))));
+};
 var _user$project$WordCounter$update = F2(
 	function (msg, model) {
 		var _p0 = msg;
-		if (_p0.ctor === 'SetContent') {
-			return {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{content: _p0._0}),
-				_1: _elm_lang$core$Platform_Cmd$none
-			};
-		} else {
-			var _p1 = _p0._0;
-			return _elm_lang$core$Native_Utils.eq(model.initialTime, 0) ? {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{initialTime: _p1 - 1, secondsElapsed: 1}),
-				_1: _elm_lang$core$Platform_Cmd$none
-			} : {
-				ctor: '_Tuple2',
-				_0: _elm_lang$core$Native_Utils.update(
-					model,
-					{secondsElapsed: _p1 - model.initialTime}),
-				_1: _elm_lang$core$Platform_Cmd$none
-			};
+		switch (_p0.ctor) {
+			case 'SetContent':
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{content: _p0._0}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'Tick':
+				var _p1 = _p0._0;
+				return _elm_lang$core$Native_Utils.eq(model.initialTime, 0) ? {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{initialTime: _p1 - 1, secondsElapsed: 1}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				} : {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{secondsElapsed: _p1 - model.initialTime}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			case 'NextStyle':
+				var newIndex = A2(_elm_lang$core$Basics_ops['%'], model.styleIndex + 1, _user$project$WordCounter$nStyles);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							styleIndex: newIndex,
+							style: A2(
+								_elm_lang$core$Maybe$withDefault,
+								_user$project$WordCounter$defaultStyle,
+								A2(_elm_lang$core$Array$get, newIndex, _user$project$WordCounter$styles))
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
+			default:
+				var newIndex = A2(_elm_lang$core$Basics_ops['%'], model.styleIndex - 1, _user$project$WordCounter$nStyles);
+				return {
+					ctor: '_Tuple2',
+					_0: _elm_lang$core$Native_Utils.update(
+						model,
+						{
+							styleIndex: newIndex,
+							style: A2(
+								_elm_lang$core$Maybe$withDefault,
+								_user$project$WordCounter$defaultStyle,
+								A2(_elm_lang$core$Array$get, newIndex, _user$project$WordCounter$styles))
+						}),
+					_1: _elm_lang$core$Platform_Cmd$none
+				};
 		}
 	});
-var _user$project$WordCounter$initialModel = {initialTime: 0, secondsElapsed: 0, content: ''};
-var _user$project$WordCounter$Model = F3(
-	function (a, b, c) {
-		return {initialTime: a, secondsElapsed: b, content: c};
+var _user$project$WordCounter$initialModel = {
+	initialTime: 0,
+	secondsElapsed: 0,
+	content: '',
+	styleIndex: 0,
+	style: A2(
+		_elm_lang$core$Maybe$withDefault,
+		_user$project$WordCounter$defaultStyle,
+		A2(_elm_lang$core$Array$get, 0, _user$project$WordCounter$styles))
+};
+var _user$project$WordCounter$Model = F5(
+	function (a, b, c, d, e) {
+		return {initialTime: a, secondsElapsed: b, content: c, styleIndex: d, style: e};
 	});
+var _user$project$WordCounter$PreviousStyle = {ctor: 'PreviousStyle'};
+var _user$project$WordCounter$NextStyle = {ctor: 'NextStyle'};
 var _user$project$WordCounter$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
@@ -8184,7 +8246,8 @@ var _user$project$WordCounter$view = function (model) {
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				_elm_lang$html$Html_Attributes$id('container')
+				_elm_lang$html$Html_Attributes$id('container'),
+				_elm_lang$html$Html_Attributes$class(model.style)
 			]),
 		_elm_lang$core$Native_List.fromArray(
 			[
@@ -8228,7 +8291,36 @@ var _user$project$WordCounter$view = function (model) {
 								_elm_lang$html$Html$text(
 								_user$project$WordCounter$formatCount(
 									_user$project$WordCounter$countWords(model.content)))
-							]))
+							])),
+						A2(
+						_elm_lang$html$Html$i,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('fa fa-angle-right next'),
+								_elm_lang$html$Html_Events$onClick(_user$project$WordCounter$NextStyle)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('styleText')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text(
+								_user$project$WordCounter$formatStyleIndex(model.styleIndex))
+							])),
+						A2(
+						_elm_lang$html$Html$i,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('fa fa-angle-left previous'),
+								_elm_lang$html$Html_Events$onClick(_user$project$WordCounter$PreviousStyle)
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[]))
 					]))
 			]));
 };
