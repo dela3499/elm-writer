@@ -93,7 +93,7 @@
 			}
 
 			.light .content {
-				color: black;
+				color: rgba(0,0,0,0.6);
 				box-shadow: rgba(0,0,0,0.1) 0px 0px 200px;
 			}
 
@@ -121,7 +121,7 @@
 			}
 
 			.dark .infoContainer {
-				color: rgba(255,255,255,0.3);
+				color: rgba(255,255,255,0.5);
 			}
 
 			/* blue */
@@ -140,9 +140,35 @@
 			}
 
 			.blue .infoContainer {
-				color: rgba(255,255,255,0.3);
+				color: rgba(255,255,255,0.5);
 			}
 
+		    *::-webkit-scrollbar-track {
+		      background-color: rgba(255,255,255,0.1);
+		      border: none;
+		      box-sizing: border-box;
+		    }
+
+		    *::-webkit-scrollbar {
+		      width: 2px;
+		      height: 2px;
+		      border: none;
+		      box-sizing: border-box;
+		    }
+
+		    *::-webkit-scrollbar-thumb {
+		      background-color: rgba(255,255,255,0.3);
+		      box-sizing: border-box;
+		    }
+
+
+			.light *::-webkit-scrollbar-track {
+		      background-color: rgba(0,0,0,0.1);
+		    }
+
+		    .light *::-webkit-scrollbar-thumb {
+		      background-color: rgba(0,0,0,0.2);
+		    }
 
 		</style>
 	</body>
