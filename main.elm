@@ -1,42 +1,45 @@
 port module WordCounter exposing ( .. )
 
-import Html exposing ( Html, text, div, span, input, textarea, img, table, tr, th, td, i, p, a )
-import Html.Events exposing ( on, targetValue, onClick, onDoubleClick, onInput )
+import Html exposing ( Html, text, div, textarea, i )
+import Html.Events exposing ( onInput, onClick )
 import Html.Attributes exposing ( .. )
 import Html.App as Html
-import Color exposing ( .. )
 
-import Maybe exposing ( withDefault, andThen )
-
-import CollectionsNg.Array as Array exposing ( Array )
-import Set exposing ( Set )
-import Dict exposing ( Dict )
-import Random
-import Result
+import Maybe exposing ( withDefault )
+import Array exposing ( Array )
 import List
-import Regex
 import String
 import Time exposing ( .. )
-import Window
-import Mouse
-import Task
-import Debug
 
+{--
+TODO: Need to change wordcount approach for large wordcounts. Can't 
+      naively count everything on every keystroke. Seems like there could 
+      be some kind of line-diffing, or chunking approach. Maybe use hybrid approach. 
+      Once every few seconds, do a full count. Use chunked count every keystroke. 
+      Only problematic when making deep edits. 
+
+--}
 
 type Msg 
   = SetContent String
   | Tick Time
+  | NextStyle
+  | PreviousStyle
 
 type alias Model =
   { initialTime: Float
   , secondsElapsed: Float
   , content: String
+  , styleIndex: Int
+  , style: String
   }
 
 initialModel = 
   { initialTime = 0
   , secondsElapsed = 0
   , content = ""
+  , styleIndex = 0
+  , style = Array.get 0 styles |> withDefault defaultStyle
   }
 
 subscriptions: Model -> Sub Msg
@@ -56,6 +59,7 @@ update msg model =
   case msg of
     SetContent content -> 
       ( { model | content = content }, Cmd.none )
+    
     Tick t -> 
       if model.initialTime == 0
         then 
@@ -65,11 +69,28 @@ update msg model =
             }, Cmd.none )
         else 
           ( { model | secondsElapsed = t - model.initialTime }, Cmd.none )
+    
+    NextStyle -> 
+      let newIndex = ( model.styleIndex + 1 ) % nStyles 
+      in 
+        ( { model 
+            | styleIndex = newIndex
+            , style = Array.get newIndex styles |> withDefault defaultStyle
+          } , Cmd.none )
+    
+    PreviousStyle -> 
+      let newIndex = ( model.styleIndex - 1 ) % nStyles 
+      in 
+        ( { model 
+            | styleIndex = newIndex
+            , style = Array.get newIndex styles |> withDefault defaultStyle
+          } , Cmd.none )
 
 view : Model -> Html Msg
 view model =
   div 
-    [ id "container" ]
+    [ id "container" 
+    , class model.style ]
     [ textarea
         [ class "content"
         , placeholder "Type in here!"
@@ -79,13 +100,27 @@ view model =
     , div 
         [ class "infoContainer" ]
         [ div
-          [ class "timer" ]
-          [ text ( formatTime model.secondsElapsed ) ]
+            [ class "timer" ]
+            [ text ( formatTime model.secondsElapsed ) ]
         , div
-          [ class "wordcount" ]
-          [ text ( model.content |> countWords |> formatCount ) ]
+            [ class "wordcount" ]
+            [ text ( model.content |> countWords |> formatCount ) ]
+        , i 
+            [ class "fa fa-angle-right next" 
+            , onClick NextStyle ]
+            []
+        , div 
+            [ class "styleText" ]
+            [ text ( formatStyleIndex model.styleIndex ) ]
+        , i 
+            [ class "fa fa-angle-left previous" 
+            , onClick PreviousStyle ]
+            []
         ]
     ]
+
+formatStyleIndex i = 
+  "Style " ++ ( toString ( i + 1 ) ) ++ " (of " ++ ( toString nStyles ) ++ ")"
 
 formatTime seconds = 
   let nMinutes = floor ( seconds / 60 )
@@ -104,3 +139,9 @@ countWords string =
   |> List.length
 
 formatCount count = ( toString count ) ++ " words"
+
+defaultStyle = "dark"
+
+styles = Array.fromList [ "dark", "light", "blue" ]
+
+nStyles = Array.length styles
