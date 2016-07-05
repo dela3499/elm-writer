@@ -88,39 +88,51 @@ update msg model =
 
 view : Model -> Html Msg
 view model =
-  div 
-    [ id "container" 
-    , class model.style ]
-    [ textarea
-        [ class "content"
-        , placeholder "Type in here!"
-        , onInput SetContent
-        ]
-        []
-    , div 
-        [ class "infoContainer" ]
-        [ div
-            [ class "timer" ]
-            [ text ( formatTime model.secondsElapsed ) ]
-        , div
-            [ class "wordcount" ]
-            [ text ( model.content |> countWords |> formatCount ) ]
-        , i 
-            [ class "fa fa-angle-right next" 
-            , onClick NextStyle ]
-            []
-        , div 
-            [ class "styleText" ]
-            [ text ( formatStyleIndex model.styleIndex ) ]
-        , i 
-            [ class "fa fa-angle-left previous" 
-            , onClick PreviousStyle ]
-            []
-        ]
-    ]
+  let count = countWords model.content
+  in
+    div 
+      [ id "container" 
+      , class model.style ]
+      [ textarea
+          [ class "content"
+          , placeholder "Type in here!"
+          , onInput SetContent
+          ]
+          []
+      , div 
+          [ class "infoContainer" ]
+          [ div
+              [ class "timer" ]
+              [ text ( formatTime model.secondsElapsed ) ]
+          , div
+              [ class "wordcount" ]
+              [ text ( count |> formatCount ) ]
+          , div
+              [ class "wpm" ]
+              [ text ( computeWpm count model.secondsElapsed |> formatWpm ) ]
+          , i 
+              [ class "fa fa-angle-right next" 
+              , onClick NextStyle ]
+              []
+          , div 
+              [ class "styleText" ]
+              [ text ( formatStyleIndex model.styleIndex ) ]
+          , i 
+              [ class "fa fa-angle-left previous" 
+              , onClick PreviousStyle ]
+              []
+          ]
+      ]
 
 formatStyleIndex i = 
   "Style " ++ ( toString ( i + 1 ) ) ++ " (of " ++ ( toString nStyles ) ++ ")"
+
+computeWpm words' seconds =
+  let words = toFloat words'
+  in words / ( seconds / 60 ) |> floor
+
+formatWpm wpm = 
+  ( toString wpm ) ++ " wpm"
 
 formatTime seconds = 
   let nMinutes = floor ( seconds / 60 )

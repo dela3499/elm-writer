@@ -8136,6 +8136,17 @@ var _user$project$WordCounter$formatTime = function (seconds) {
 		minutesString,
 		A2(_elm_lang$core$Basics_ops['++'], ':', secondsString));
 };
+var _user$project$WordCounter$formatWpm = function (wpm) {
+	return A2(
+		_elm_lang$core$Basics_ops['++'],
+		_elm_lang$core$Basics$toString(wpm),
+		' wpm');
+};
+var _user$project$WordCounter$computeWpm = F2(
+	function (words$, seconds) {
+		var words = _elm_lang$core$Basics$toFloat(words$);
+		return _elm_lang$core$Basics$floor(words / (seconds / 60));
+	});
 var _user$project$WordCounter$formatStyleIndex = function (i) {
 	return A2(
 		_elm_lang$core$Basics_ops['++'],
@@ -8242,6 +8253,7 @@ var _user$project$WordCounter$SetContent = function (a) {
 	return {ctor: 'SetContent', _0: a};
 };
 var _user$project$WordCounter$view = function (model) {
+	var count = _user$project$WordCounter$countWords(model.content);
 	return A2(
 		_elm_lang$html$Html$div,
 		_elm_lang$core$Native_List.fromArray(
@@ -8289,8 +8301,19 @@ var _user$project$WordCounter$view = function (model) {
 						_elm_lang$core$Native_List.fromArray(
 							[
 								_elm_lang$html$Html$text(
-								_user$project$WordCounter$formatCount(
-									_user$project$WordCounter$countWords(model.content)))
+								_user$project$WordCounter$formatCount(count))
+							])),
+						A2(
+						_elm_lang$html$Html$div,
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html_Attributes$class('wpm')
+							]),
+						_elm_lang$core$Native_List.fromArray(
+							[
+								_elm_lang$html$Html$text(
+								_user$project$WordCounter$formatWpm(
+									A2(_user$project$WordCounter$computeWpm, count, model.secondsElapsed)))
 							])),
 						A2(
 						_elm_lang$html$Html$i,
